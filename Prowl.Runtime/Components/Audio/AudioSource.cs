@@ -8,28 +8,99 @@ namespace Prowl.Runtime
     public sealed class AudioSource : MonoBehaviour
     {
         public AssetRef<AudioClip> Clip;
+       
         public bool PlayOnAwake = true;
-        public bool Looping = false;
-        public float Volume = 1f;
-        public float MaxDistance = 32f;
+
+        public bool Looping
+        {
+            get { return _looping; }
+            set
+            {
+                if (_looping != value)
+                {
+                    _looping = value;
+                    if (_source != null)
+                    {
+                        _source.Looping = _looping;
+                    }
+                }
+            }
+        }
+
+        public float Volume
+        {
+            get { return _gain; }
+            set
+            {
+                if ( _gain != value )
+                {
+                    _gain = value;
+                    if (_source != null)
+                    {
+                        _source.Gain = _gain;
+                    }
+                }
+            }
+        }
+
+        public float Pitch
+        {
+            get { return _pitch; }
+            set
+            {
+                if (_pitch != value)
+                {
+                    _pitch = value;
+                    if (_source != null)
+                    {
+                        _source.Pitch = _pitch;
+                    }
+                }
+            }
+        }
+
+        public float MaxDistance
+        {
+            get { return _maxDistance; }
+            set
+            {
+                if (_maxDistance != value)
+                {
+                    _maxDistance = value;
+                    if (_source != null)
+                    {
+                        _source.MaxDistance = _maxDistance;
+                    }
+                }
+            }
+        }
+
+        public bool IsPlaying = false;
 
         private ActiveAudio _source;
         private AudioBuffer _buffer;
         private uint _lastVersion;
         private bool _looping = false;
         private float _gain = 1f;
+        private float _pitch = 0f;
         private float _maxDistance = 32f;
 
         public void Play()
         {
             if (Clip.IsAvailable)
+            {
                 _source.Play(_buffer);
+                IsPlaying = true;
+            }
         }
 
         public void Stop()
         {
             if (Clip.IsAvailable)
+            {
                 _source?.Stop();
+                IsPlaying = false;
+            }
         }
 
         public override void Awake()
@@ -63,24 +134,6 @@ namespace Prowl.Runtime
 
             if (Clip.IsAvailable)
                 _buffer = AudioSystem.GetAudioBuffer(Clip.Res!);
-
-            if (_looping != Looping)
-            {
-                _source.Looping = Looping;
-                _looping = Looping;
-            }
-
-            if (_gain != Volume)
-            {
-                _source.Gain = Volume;
-                _gain = Volume;
-            }
-
-            if (_maxDistance != MaxDistance)
-            {
-                _source.MaxDistance = MaxDistance;
-                _maxDistance = MaxDistance;
-            }
         }
 
         public override void OnDisable() => _source.Stop();
